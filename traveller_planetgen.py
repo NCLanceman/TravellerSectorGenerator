@@ -33,6 +33,28 @@ def hex_translate(num):
         }
         return hex_chart.get(num, "Invalid Num")
 
+def int_translate(hexnum):
+        int_chart={
+            "0": 0,
+            "1": 1,
+            "2": 2,
+            "3": 3,
+            "4": 4,
+            "5": 5,
+            "6": 6,
+            "7": 7,
+            "8": 8,
+            "9": 9,
+            "A": 10,
+            "B": 11,
+            "C": 12,
+            "D": 13,
+            "E": 14,
+            "F": 15,
+            "G": 16
+        }
+        return int_chart.get(hexnum, "Invalid Hex")
+
 def systemcontent():
     syscontent = {
         2: "ANNY",
@@ -117,7 +139,7 @@ def techlevel(port, size, atm, hyd, pop, govt):
 
     return single_throw() + dieMod
 
-def uwp_gen(base, size, atmo, hydro, pop, govt, law, tech, tradecodes):
+def uwp_gen(base, size, atmo, hydro, pop, govt, law, tech, content):
     start_list = [size, atmo, hydro, pop, govt, law, tech]
     uwp_list = []
     
@@ -127,9 +149,12 @@ def uwp_gen(base, size, atmo, hydro, pop, govt, law, tech, tradecodes):
     uwp_list.insert(0, base)
     uwp_list.insert((len(uwp_list)-1),"-")
     uwp = "".join(uwp_list)
+    tradecodes = tradecode_generate(uwp)
     uwp = uwp + "\t"
     for x in tradecodes:
         uwp = uwp + " " + x
+    
+    uwp = uwp + "\t" + content[1:]
 
     return uwp 
 
@@ -288,46 +313,61 @@ def uwp8_translate(tech):
     }
     return tech_chart.get(tech)
 
-def print_description(uwp, content, tradecodes): 
-    print("WORLD DETAILS: " + uwp)
-    print("Trade Codes: " + tradecode_translate(tradecodes))
-    print("Starbase: " + uwp1_translate(uwp[0]))
-    print("Size: " + uwp2_translate(uwp[1]))
-    print("Atmosphere: " + uwp3_translate(uwp[2]))
-    print("Hydrographic: " + uwp4_translate(uwp[3]))
-    print("Population: " + uwp5_translate(uwp[4]))
-    print("Government: " + uwp6_translate(uwp[5]))
-    print("Law Level: " + uwp7_translate(uwp[6]))
-    print("Tech Level: " + uwp8_translate(uwp[8]))
-    print("Naval Base? " + content[1])
-    print("Scout Base? " + content[2])
-    print("Gas Giant? " + content[3] + "\n\n")
+def print_description(uwp):
+    content = (((uwp.split('\t'))[2]).split(" "))[0]
+    
+    description = ""
 
-def tradecode_generate(size, atmo, hydro, pop, gov, law):
+    description += ("WORLD DETAILS: " + uwp)
+    description +=("\nTrade Codes: " + tradecode_translate(uwp))
+    description +=("\nStarbase: " + uwp1_translate(uwp[0]))
+    description +=("\nSize: " + uwp2_translate(uwp[1]))
+    description +=("\nAtmosphere: " + uwp3_translate(uwp[2]))
+    description +=("\nHydrographic: " + uwp4_translate(uwp[3]))
+    description +=("\nPopulation: " + uwp5_translate(uwp[4]))
+    description +=("\nGovernment: " + uwp6_translate(uwp[5]))
+    description +=("\nLaw Level: " + uwp7_translate(uwp[6]))
+    description +=("\nTech Level: " + uwp8_translate(uwp[8]))
+    description +=("\nNaval Base? " + content[0])
+    description +=("\nScout Base? " + content[1])
+    description +=("\nGas Giant? " + content[2] + "\n\n")
+
+    return description
+
+def tradecode_generate(uwp):
+    #UWP
+    size = int_translate(uwp[1])
+    atmo = int_translate(uwp[2])
+    hydro = int_translate(uwp[3])
+    pop = int_translate(uwp[4])
+    gov = int_translate(uwp[5])
+    law = int_translate(uwp[6])
+
+    
     tc_list = []
     
     #Agricultural (Ag)
-    if atmo >= 4 and atmo <= 9 and hydro <=4 and hydro >=8 and pop >=5 and pop <=7:
+    if atmo in [4,5,6,7,8,9] and hydro in [4,5,6,7,8] and pop in [5,6,7]:
         tc_list.append("Ag")
     
     #Non-Agricultural (Na)
-    if atmo < 3 and hydro < 3 and pop > 6:
+    if atmo <= 3 and hydro <= 3 and pop >= 6:
         tc_list.append("Na")
     
     #Industrial (In)
-    if atmo in (0,1,2,4,7,9) and pop > 9:
+    if atmo in [0,1,2,4,7,9] and pop >= 9:
         tc_list.append("In")
     
     #Non-Industrual(Ni)
-    if pop < 6:
+    if pop <= 6:
         tc_list.append("Ni")
     
     #Rich (Ri)
-    if atmo in (6, 8) and pop in (6, 7, 8) and gov >=4 and gov <= 9:
+    if atmo in [6, 7, 8] and pop in [6, 7, 8] and gov >=4 and gov <= 9:
         tc_list.append("Ri")
     
     #Poor (Po)
-    if atmo >= 2 and atmo <=5 and hydro < 2:
+    if atmo in [2,3,4,5] and hydro <= 3:
         tc_list.append("Po")
     
     #Water World (Wa)
@@ -352,7 +392,7 @@ def tradecode_generate(size, atmo, hydro, pop, gov, law):
     
     return tc_list
 
-def tradecode_translate(tradecodes):
+def tradecode_translate(uwp):
     result = " "
     trade_chart = {
         "Ag":"Agricultural",
@@ -367,7 +407,8 @@ def tradecode_translate(tradecodes):
         "As":"Asteroid Belt",
         "Ic":"Ice Capped"
     }
-
+    tradecodes = ((uwp.split('\t'))[1]).split(" ")
+    tradecodes.pop(0)
     if tradecodes:
         for x in tradecodes:
             result = result + " " + trade_chart.get(x) + " "
@@ -424,17 +465,22 @@ def create_system():
         plaw = 0
 
     ptech = techlevel(pcontent[0], psize, patmo, phydro, ppop, pgov)
-    tradecodes = tradecode_generate(psize, patmo, phydro, ppop, pgov, plaw)
-    uwp = uwp_gen(pcontent[0], psize, patmo, phydro, ppop, pgov, plaw, ptech, tradecodes)
-    print_description(uwp, pcontent, tradecodes)
+    uwp = uwp_gen(pcontent[0], psize, patmo, phydro, ppop, pgov, plaw, ptech, pcontent)
+    print(print_description(uwp))
+
+    return uwp
 
 program_running = True
+
+current_uwp = ""
+saveFile = open("Saved UWPs.txt", 'a')
 
 while(program_running):
     print("Traveller System Generator!")
     print("Make a selection: ")
     print("1. Create a New System.")
-    print("2. Exit Program.")
+    print("2. Save Previous System.")
+    print("3. Exit Program.")
 
     try:
         select = int(input("\nSelection: "))    
@@ -442,6 +488,11 @@ while(program_running):
         print("Invalid Selection!")
     else:
         if select == 1:
-            create_system()
+            current_uwp = create_system()
         elif select == 2:
+            saveFile.write(current_uwp)
+            saveFile.write("\n"+print_description(current_uwp))
+            print("\n\nFile Saved!\n\n")
+        elif select == 3:
+            saveFile.close()
             program_running = False
