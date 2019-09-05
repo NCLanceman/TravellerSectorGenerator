@@ -109,7 +109,16 @@ def uwp_gen(base, size, atmo, hydro, pop, govt, law, tech, content):
     for x in tradecodes:
         uwp = uwp + " " + x
     
-    uwp = uwp + "\t" + content[1:]
+    sysdetail = ""
+
+    if (content[1:])[0] == "Y":
+        sysdetail += "N"
+    if (content[1:])[1] == "Y":
+        sysdetail += "S"
+    if (content[1:])[2] == "Y":
+        sysdetail += "G"
+
+    uwp = uwp + "\t" + sysdetail
 
     return uwp 
 
@@ -128,9 +137,26 @@ def print_description(uwp):
     description +=("\nGovernment: " + t_charts.uwp6_translate(uwp[5]))
     description +=("\nLaw Level: " + t_charts.uwp7_translate(uwp[6]))
     description +=("\nTech Level: " + t_charts.uwp8_translate(uwp[8]))
-    description +=("\nNaval Base? " + content[0])
-    description +=("\nScout Base? " + content[1])
-    description +=("\nGas Giant? " + content[2] + "\n\n")
+
+    if content:
+        if "N" in content: 
+            description +=("\nNaval Base? Y")
+        else:
+            description +=("\nNaval Base? N")
+        
+        if "S" in content:
+            description +=("\nScout Base? Y")
+        else:
+            description +=("\nScout Base? Y")
+        
+        if "G" in content:
+            description +=("\nGas Giant? Y\n\n")
+        else:
+            description +=("\nGas Giant? N\n\n")
+    else:
+        description +=("\nNaval Base? N")
+        description +=("\nScout Base? N")
+        description +=("\nGas Giant? N\n\n")
 
     return description
 
