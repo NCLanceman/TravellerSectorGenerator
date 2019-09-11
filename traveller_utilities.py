@@ -295,3 +295,35 @@ def create_system():
     print(print_description(uwp))
 
     return uwp
+
+def create_j_subsector(jlimit, known):
+    result = ""
+    current_sys = create_system()
+    
+    #Create System for center hex
+    while current_sys[0] != "A":
+        current_sys = create_system()
+
+    result += "SYSTEM CAPITAL: \n" + print_description(current_sys)
+    for i in range(1, jlimit+1):
+        cycle = i * 6
+        if i <= known:
+            for j in range(1, cycle+1):
+                roll = single_throw()
+                if roll >= 4:
+                    current_sys = create_system()
+                    location = "Location {}-{} \n".format(i,j)
+                    result += location + print_description(current_sys)
+                else:
+                    break
+        else: 
+            for j in range(1,cycle+1):
+                roll = single_throw()
+                if roll >= 4:
+                    location = "Location {}-{} \n".format(i,j)
+                    result += location + "An unexplored system is here.\n"
+    return result
+            
+    
+    
+    

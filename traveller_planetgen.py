@@ -11,7 +11,8 @@ while(program_running):
     print("Make a selection: ")
     print("1. Create a New System.")
     print("2. Save Previous System.")
-    print("3. Exit Program.")
+    print("3. Create Jump Subsector.")
+    print("4. Exit Program.")
 
     try:
         select = int(input("\nSelection: "))    
@@ -25,5 +26,18 @@ while(program_running):
             saveFile.write("\n"+t_util.print_description(current_uwp)+"\n\n")
             print("\n\nFile Saved!\n\n")
         elif select == 3:
+            try:
+                j_range = int(input("\nJump Range: "))
+            except ValueError:
+                print("Invalid Selection!")
+            else:
+                try:
+                    known = int(input("\nKnown System Radius: "))
+                except ValueError:
+                    print("Invalid Selection!")
+                else:
+                    saveFile.write(t_util.create_j_subsector(j_range,known))
+                    print("\n\nSystem Saved!\n\n")
+        elif select == 4:
             saveFile.close()
             program_running = False
