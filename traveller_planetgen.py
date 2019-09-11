@@ -4,7 +4,6 @@ import traveller_utilities as t_util
 program_running = True
 
 current_uwp = ""
-saveFile = open("Saved UWPs.txt", 'a')
 
 while(program_running):
     print("Traveller System Generator!")
@@ -22,8 +21,10 @@ while(program_running):
         if select == 1:
             current_uwp = t_util.create_system()
         elif select == 2:
+            saveFile = open("Saved UWPs.txt", 'a')
             saveFile.write(current_uwp)
             saveFile.write("\n"+t_util.print_description(current_uwp)+"\n\n")
+            saveFile.close()
             print("\n\nFile Saved!\n\n")
         elif select == 3:
             try:
@@ -36,8 +37,9 @@ while(program_running):
                 except ValueError:
                     print("Invalid Selection!")
                 else:
+                    saveFile = open("New Sector.txt", 'a')
                     saveFile.write(t_util.create_j_subsector(j_range,known))
+                    saveFile.close()
                     print("\n\nSystem Saved!\n\n")
         elif select == 4:
-            saveFile.close()
             program_running = False

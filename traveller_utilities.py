@@ -292,7 +292,7 @@ def create_system():
 
     ptech = techlevel(pcontent[0], psize, patmo, phydro, ppop, pgov)
     uwp = uwp_gen(pcontent[0], psize, patmo, phydro, ppop, pgov, plaw, ptech, pcontent)
-    print(print_description(uwp))
+    #print(print_description(uwp))
 
     return uwp
 
@@ -309,19 +309,21 @@ def create_j_subsector(jlimit, known):
         cycle = i * 6
         if i <= known:
             for j in range(1, cycle+1):
+                print(("Rolling for Location{}-{}").format(i,j))
                 roll = single_throw()
                 if roll >= 4:
                     current_sys = create_system()
                     location = "Location {}-{} \n".format(i,j)
                     result += location + print_description(current_sys)
-                else:
-                    break
+                    print("Hit! " + current_sys)
         else: 
             for j in range(1,cycle+1):
+                print(("Rolling for Location{}-{}").format(i,j))
                 roll = single_throw()
                 if roll >= 4:
                     location = "Location {}-{} \n".format(i,j)
                     result += location + "An unexplored system is here.\n"
+                    print("Hit! Unexplored System.\n")
     return result
             
     
