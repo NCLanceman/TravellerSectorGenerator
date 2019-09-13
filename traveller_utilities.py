@@ -1,4 +1,5 @@
 import random
+import map_hex
 import traveller_charts as t_charts
 
 def __init__():
@@ -6,6 +7,23 @@ def __init__():
 
 def throw():
     return single_throw() + single_throw()
+
+def grid_generate(radius):
+    origin = [radius+1, radius+1]
+    edge = origin[0] + radius
+
+    board = []
+    count = 0
+    print("Origin is at :", origin)
+    for i in range(1,edge+1):
+        for j in range(1, edge+1):
+            name = ("{}-{}").format(i,j)
+            print(("Adding #{}: {}").format(count,name))
+            coord = [i,j]
+            board.append(map_hex.Map_Hex(coord,name, origin))
+            count = count + 1
+    
+    return board
 
 def single_throw():
     return random.randint(1,6)
@@ -94,6 +112,15 @@ def techlevel(port, size, atm, hyd, pop, govt):
 
     return single_throw() + dieMod
 
+#A full Traveller UWP:
+#Location: XXYY
+#Name: String
+#UWP: 
+#Bases: NS
+#Remarks: Trade Codes
+#PBG: Population Multiplier, Belts, Gas Giants
+#Allegince: Two-Character code
+#Stars: Stellar Classification, Space Seprated
 def uwp_gen(base, size, atmo, hydro, pop, govt, law, tech, content):
     start_list = [size, atmo, hydro, pop, govt, law, tech]
     uwp_list = []
@@ -105,9 +132,7 @@ def uwp_gen(base, size, atmo, hydro, pop, govt, law, tech, content):
     uwp_list.insert((len(uwp_list)-1),"-")
     uwp = "".join(uwp_list)
     tradecodes = tradecode_generate(uwp)
-    uwp = uwp + "\t"
-    for x in tradecodes:
-        uwp = uwp + " " + x
+    uwp = uwp + "\t" + tradecodes
     
     sysdetail = ""
 
@@ -171,6 +196,7 @@ def tradecode_generate(uwp):
 
     
     tc_list = []
+    remarks = ""
     
     #Agricultural (Ag)
     if atmo in [4,5,6,7,8,9] and hydro in [4,5,6,7,8] and pop in [5,6,7]:
@@ -216,7 +242,10 @@ def tradecode_generate(uwp):
     if atmo <= 1 and hydro > 1:
         tc_list.append("Ic")
     
-    return tc_list
+    for x in tc_list:
+        remarks += x + " "
+
+    return remarks
 
 def tradecode_translate(uwp):
     result = " "
@@ -237,7 +266,8 @@ def tradecode_translate(uwp):
     tradecodes.pop(0)
     if tradecodes:
         for x in tradecodes:
-            result = result + " " + trade_chart.get(x) + " "
+            if x:
+                result += " " + trade_chart.get(x) + " "
     else:
         result = "None"
 
@@ -292,7 +322,7 @@ def create_system():
 
     ptech = techlevel(pcontent[0], psize, patmo, phydro, ppop, pgov)
     uwp = uwp_gen(pcontent[0], psize, patmo, phydro, ppop, pgov, plaw, ptech, pcontent)
-    #print(print_description(uwp))
+    print(print_description(uwp))
 
     return uwp
 
@@ -325,7 +355,30 @@ def create_j_subsector(jlimit, known):
                     result += location + "An unexplored system is here.\n"
                     print("Hit! Unexplored System.\n")
     return result
-            
+
+def create_jlist_sector(h_list, known):
+    result = ""
+
+    for x in h_list:
+        roll = single_throw()
+        if x.dist_from_origin == 0 and x.dist_from_origin <= known:
+            location = "Location{} \n".format(x.description)
+            while current_sys[0] != "A":
+                current_sys = create_system()
+            result += "SYSTEM CAPITAL: \n" + location + print_description(current_sys) 
+        elif x.dist_from_origin <= known:
+            if roll >= 4:
+                current_sys = create_system()
+                location = "Location {} \n".format(x.description)
+                result += location + print_description(current_sys)
+                print("Hit! " + current_sys)
+        elif x.dist_from_origin > known:
+            if roll >= 4:
+                location = "Location {} \n".format(x.description)
+                result += location + "An unexplored system is here.\n"
+                print("Hit! Unexplored System.\n")
+         
     
+    return result
     
     
