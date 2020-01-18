@@ -20,7 +20,7 @@ def grid_generate(radius):
             name = ("{}-{}").format(i,j)
             print(("Adding #{}: {}").format(count,name))
             coord = [i,j]
-            board.append(map_hex.Map_Hex(coord,name, origin))
+            board.append(map_hex.Map_Hex(coord, origin))
             count = count + 1
     
     return board
@@ -121,29 +121,39 @@ def techlevel(port, size, atm, hyd, pop, govt):
 #PBG: Population Multiplier, Belts, Gas Giants
 #Allegince: Two-Character code
 #Stars: Stellar Classification, Space Seprated
-def uwp_gen(base, size, atmo, hydro, pop, govt, law, tech, content):
+def uwp_gen(base, size, atmo, hydro, pop, govt, law, tech, content, remarks):
     start_list = [size, atmo, hydro, pop, govt, law, tech]
     uwp_list = []
     
-    for x in start_list:
-        uwp_list.append(t_charts.hex_translate(x))
-    
-    uwp_list.insert(0, base)
-    uwp_list.insert((len(uwp_list)-1),"-")
-    uwp = "".join(uwp_list)
-    tradecodes = tradecode_generate(uwp)
+    if remarks == "Unknown":
+        uwp = "???????-?"
+    else: 
+        for x in start_list:
+            uwp_list.append(t_charts.hex_translate(x))
+        
+        uwp_list.insert(0, base)
+        uwp_list.insert((len(uwp_list)-1),"-")
+        uwp = "".join(uwp_list)
+
+    if remarks == "Capital":
+        tradecodes = tradecode_generate(uwp, True)
+    elif remarks == "Known":
+        tradecodes = tradecode_generate(uwp, False)
+    elif remarks == "Unknown":
+        tradecodes = ""
+
     uwp = uwp + "\t" + tradecodes
     
     sysdetail = ""
 
-    if (content[1:])[0] == "Y":
-        sysdetail += "N"
-    if (content[1:])[1] == "Y":
-        sysdetail += "S"
-    if (content[1:])[2] == "Y":
-        sysdetail += "G"
+    #if (content[1:])[0] == "Y" and remarks != "Unknown":
+    #    sysdetail += "N"
+    #if (content[1:])[1] == "Y" and remarks != "Unknown":
+    #    sysdetail += "S"
+    #if (content[1:])[2] == "Y" and remarks != "Unknown":
+    #    sysdetail += "G"
 
-    uwp = uwp + "\t" + sysdetail
+    #uwp = uwp + "\t" + sysdetail
 
     return uwp 
 
@@ -151,41 +161,43 @@ def print_description(uwp):
     content = (((uwp.split('\t'))[2]).split(" "))[0]
     
     description = ""
+    if uwp[0] == "?":
+        description = "An Unexplored System is here."
+    else:
+        description += ("WORLD DETAILS: " + uwp)
+        description +=("\nTrade Codes: " + tradecode_translate(uwp))
+        description +=("\nStarbase: " + t_charts.uwp1_translate(uwp[0]))
+        description +=("\nSize: " + t_charts.uwp2_translate(uwp[1]))
+        description +=("\nAtmosphere: " + t_charts.uwp3_translate(uwp[2]))
+        description +=("\nHydrographic: " + t_charts.uwp4_translate(uwp[3]))
+        description +=("\nPopulation: " + t_charts.uwp5_translate(uwp[4]))
+        description +=("\nGovernment: " + t_charts.uwp6_translate(uwp[5]))
+        description +=("\nLaw Level: " + t_charts.uwp7_translate(uwp[6]))
+        description +=("\nTech Level: " + t_charts.uwp8_translate(uwp[8]))
 
-    description += ("WORLD DETAILS: " + uwp)
-    description +=("\nTrade Codes: " + tradecode_translate(uwp))
-    description +=("\nStarbase: " + t_charts.uwp1_translate(uwp[0]))
-    description +=("\nSize: " + t_charts.uwp2_translate(uwp[1]))
-    description +=("\nAtmosphere: " + t_charts.uwp3_translate(uwp[2]))
-    description +=("\nHydrographic: " + t_charts.uwp4_translate(uwp[3]))
-    description +=("\nPopulation: " + t_charts.uwp5_translate(uwp[4]))
-    description +=("\nGovernment: " + t_charts.uwp6_translate(uwp[5]))
-    description +=("\nLaw Level: " + t_charts.uwp7_translate(uwp[6]))
-    description +=("\nTech Level: " + t_charts.uwp8_translate(uwp[8]))
-
-    if content:
-        if "N" in content: 
-            description +=("\nNaval Base? Y")
+        if content:
+            if "N" in content: 
+                description +=("\nNaval Base? Y")
+            else:
+                description +=("\nNaval Base? N")
+            
+            if "S" in content:
+                description +=("\nScout Base? Y")
+            else:
+                description +=("\nScout Base? Y")
+            
+            if "G" in content:
+                description +=("\nGas Giant? Y\n\n")
+            else:
+                description +=("\nGas Giant? N\n\n")
         else:
             description +=("\nNaval Base? N")
-        
-        if "S" in content:
-            description +=("\nScout Base? Y")
-        else:
-            description +=("\nScout Base? Y")
-        
-        if "G" in content:
-            description +=("\nGas Giant? Y\n\n")
-        else:
+            description +=("\nScout Base? N")
             description +=("\nGas Giant? N\n\n")
-    else:
-        description +=("\nNaval Base? N")
-        description +=("\nScout Base? N")
-        description +=("\nGas Giant? N\n\n")
 
     return description
 
-def tradecode_generate(uwp):
+def tradecode_generate(uwp, cap):
     #UWP
     size = t_charts.int_translate(uwp[1])
     atmo = t_charts.int_translate(uwp[2])
@@ -241,6 +253,10 @@ def tradecode_generate(uwp):
     #Ice-Capped (Ic)
     if atmo <= 1 and hydro > 1:
         tc_list.append("Ic")
+
+    #Capital (Ca)
+    if cap == True:
+        tc_list.append("Ca")
     
     for x in tc_list:
         remarks += x + " "
@@ -260,10 +276,11 @@ def tradecode_translate(uwp):
         "De":"Desert World",
         "Va":"Vaccum World",
         "As":"Asteroid Belt",
-        "Ic":"Ice Capped"
+        "Ic":"Ice Capped",
+        "Ca": "Capital"
     }
     tradecodes = ((uwp.split('\t'))[1]).split(" ")
-    tradecodes.pop(0)
+
     if tradecodes:
         for x in tradecodes:
             if x:
@@ -273,7 +290,7 @@ def tradecode_translate(uwp):
 
     return result
 
-def create_system():    
+def create_system(remarks):    
     #System Content
     #[0] = Starbase
     #[1] = Naval Base
@@ -321,8 +338,8 @@ def create_system():
         plaw = 0
 
     ptech = techlevel(pcontent[0], psize, patmo, phydro, ppop, pgov)
-    uwp = uwp_gen(pcontent[0], psize, patmo, phydro, ppop, pgov, plaw, ptech, pcontent)
-    print(print_description(uwp))
+    uwp = uwp_gen(pcontent[0], psize, patmo, phydro, ppop, pgov, plaw, ptech, pcontent, remarks)
+    #print(print_description(uwp))
 
     return uwp
 
@@ -357,25 +374,25 @@ def create_j_subsector(jlimit, known):
     return result
 
 def create_jlist_sector(h_list, known):
-    result = ""
+    result = ("Hex\tName\tUWP\tRemarks\t{Ix}\t(Ex)\t[Cx]\tN\tB\tZ\tPBG\tW\tA\tStellar\n")
 
     for x in h_list:
         roll = single_throw()
+        location = x.description
+
         if x.dist_from_origin == 0 and x.dist_from_origin <= known:
-            location = "Location{} \n".format(x.description)
             while current_sys[0] != "A":
-                current_sys = create_system()
-            result += "SYSTEM CAPITAL: \n" + location + print_description(current_sys) 
+                current_sys = create_system("Capital")
+            result += location +"\tCapital\t"+ current_sys + "\t"*7 + "111" +"\t"*3 + "\n" 
         elif x.dist_from_origin <= known:
             if roll >= 4:
-                current_sys = create_system()
-                location = "Location {} \n".format(x.description)
-                result += location + print_description(current_sys)
+                current_sys = create_system("Known")
+                result += location +"\tKnown\t"+ current_sys + "\t"*7 + "111" +"\t"*3 +"\n"
                 print("Hit! " + current_sys)
         elif x.dist_from_origin > known:
             if roll >= 4:
-                location = "Location {} \n".format(x.description)
-                result += location + "An unexplored system is here.\n"
+                current_sys = create_system("Unknown")
+                result += location +"\tBlank\t"+ current_sys + "\t"*7 + "111" +"\t"*3 +"\n"
                 print("Hit! Unexplored System.\n")
          
     
