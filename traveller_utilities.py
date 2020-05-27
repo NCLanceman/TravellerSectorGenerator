@@ -5,8 +5,14 @@ import traveller_charts as t_charts
 def __init__():
     self.Charts = Traveller_Charts()
 
+def single_throw():
+    return random.randint(1,6)
+
 def throw():
     return single_throw() + single_throw()
+
+def half_throw():
+    return random.randint(1,3)
 
 def grid_generate(radius):
     origin = [radius+1, radius+1]
@@ -24,9 +30,6 @@ def grid_generate(radius):
             count = count + 1
     
     return board
-
-def single_throw():
-    return random.randint(1,6)
 
 def systemcontent():
     syscontent = {
@@ -141,8 +144,9 @@ def uwp_gen(base, size, atmo, hydro, pop, govt, law, tech, content, remarks):
         tradecodes = tradecode_generate(uwp, False)
     elif remarks == "Unknown":
         tradecodes = ""
+        content = "\t"*7 + "???" +"\t"*3 
 
-    uwp = uwp + "\t" + tradecodes
+    uwp = uwp + "\t" + tradecodes + content
     
     sysdetail = ""
 
@@ -158,8 +162,10 @@ def uwp_gen(base, size, atmo, hydro, pop, govt, law, tech, content, remarks):
     return uwp 
 
 def print_description(uwp):
-    content = (((uwp.split('\t'))[2]).split(" "))[0]
+    content = uwp.split('\t')
     
+    print(content)
+
     description = ""
     if uwp[0] == "?":
         description = "An Unexplored System is here."
@@ -176,17 +182,17 @@ def print_description(uwp):
         description +=("\nTech Level: " + t_charts.uwp8_translate(uwp[8]))
 
         if content:
-            if "N" in content: 
+            if "N" in content[6]: 
                 description +=("\nNaval Base? Y")
             else:
                 description +=("\nNaval Base? N")
             
-            if "S" in content:
+            if "S" in content[6]:
                 description +=("\nScout Base? Y")
             else:
                 description +=("\nScout Base? Y")
             
-            if "G" in content:
+            if (int(content[8][2]) > 0):
                 description +=("\nGas Giant? Y\n\n")
             else:
                 description +=("\nGas Giant? N\n\n")
@@ -298,6 +304,8 @@ def create_system(remarks):
     #[3] = Gas Giant
     pcontent = systemcontent()
 
+    content = "\t"*5
+
     #Planet Size
     psize = throw()-2
     #Atmosphere
@@ -335,10 +343,27 @@ def create_system(remarks):
     if plaw >= 10:
         plaw = 10
     elif plaw <= 0:
-        plaw = 0
+        plaw = 0   
+    
+    if (pcontent[1] == "Y"):
+        content += "N"
+    
+    if(pcontent[2]== "Y"):
+        content += "S" + "\t"*2
+    elif(pcontent[2]=="N"):
+        content += "\t"*2
+    
+    content += str(single_throw()) * 2
+
+    if(pcontent[3]== "Y"):
+        content += (str(half_throw())) +"\t"*3
+    elif(pcontent[3]=="N"):
+        content += ("0") + "\t"*3   
+
 
     ptech = techlevel(pcontent[0], psize, patmo, phydro, ppop, pgov)
-    uwp = uwp_gen(pcontent[0], psize, patmo, phydro, ppop, pgov, plaw, ptech, pcontent, remarks)
+    uwp = uwp_gen(pcontent[0], psize, patmo, phydro, ppop, pgov, plaw, ptech, content, remarks)
+    
     #print(print_description(uwp))
 
     return uwp
@@ -349,7 +374,7 @@ def create_j_subsector(jlimit, known):
     
     #Create System for center hex
     while current_sys[0] != "A":
-        current_sys = create_system()
+        current_sys = create_system("Capital")
 
     result += "SYSTEM CAPITAL: \n" + print_description(current_sys)
     for i in range(1, jlimit+1):
@@ -359,7 +384,7 @@ def create_j_subsector(jlimit, known):
                 print(("Rolling for Location{}-{}").format(i,j))
                 roll = single_throw()
                 if roll >= 4:
-                    current_sys = create_system()
+                    current_sys = create_system("Known")
                     location = "Location {}-{} \n".format(i,j)
                     result += location + print_description(current_sys)
                     print("Hit! " + current_sys)
@@ -383,16 +408,16 @@ def create_jlist_sector(h_list, known):
         if x.dist_from_origin == 0 and x.dist_from_origin <= known:
             while current_sys[0] != "A":
                 current_sys = create_system("Capital")
-            result += location +"\tCapital\t"+ current_sys + "\t"*7 + "111" +"\t"*3 + "\n" 
+            result += location +"\tCapital\t"+ current_sys + "\n" 
         elif x.dist_from_origin <= known:
             if roll >= 4:
                 current_sys = create_system("Known")
-                result += location +"\tKnown\t"+ current_sys + "\t"*7 + "111" +"\t"*3 +"\n"
+                result += location +"\tKnown\t"+ current_sys +"\n"
                 print("Hit! " + current_sys)
         elif x.dist_from_origin > known:
             if roll >= 4:
                 current_sys = create_system("Unknown")
-                result += location +"\tBlank\t"+ current_sys + "\t"*7 + "111" +"\t"*3 +"\n"
+                result += location +"\tBlank\t"+ current_sys +"\n"
                 print("Hit! Unexplored System.\n")
          
     

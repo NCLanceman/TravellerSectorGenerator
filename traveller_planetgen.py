@@ -1,9 +1,11 @@
 import traveller_utilities as t_util
+import map_hex
 #Starter Traveller Planet Generation
 
 program_running = True
 
 current_uwp = ""
+result = ""
 
 while(program_running):
     print("Traveller System Generator!")
@@ -20,10 +22,12 @@ while(program_running):
         print("Invalid Selection!")
     else:
         if select == 1:
-            current_uwp = t_util.create_system()
+            location = input("\nLocation: ")
+            current_uwp = t_util.create_system("Known")
+            result += location +"\tKnown\t"+ current_uwp +"\n"
+            print(result)
         elif select == 2:
             saveFile = open("Saved UWPs.txt", 'a')
-            saveFile.write(current_uwp)
             saveFile.write("\n"+t_util.print_description(current_uwp)+"\n\n")
             saveFile.close()
             print("\n\nFile Saved!\n\n")
@@ -48,6 +52,7 @@ while(program_running):
             except ValueError:
                 print("Invalid Selection!")
             else:
+                origin = ((str(j_range+1)).zfill(2))*2
                 try:
                     known = int(input("Known System Radius: "))
                 except ValueError:
@@ -55,6 +60,7 @@ while(program_running):
                 else:
                     board = t_util.grid_generate(j_range)
                     saveFile = open("New Sector.txt", 'a')
+                    saveFile.write("Origin: " + origin + "\n")
                     saveFile.write(t_util.create_jlist_sector(board,known))
                     saveFile.close()
                     print("\n\nSystem Saved!\n\n")
