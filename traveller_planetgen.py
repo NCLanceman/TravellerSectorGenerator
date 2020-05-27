@@ -12,9 +12,8 @@ while(program_running):
     print("Make a selection: ")
     print("1. Create a New System.")
     print("2. Save Previous System.")
-    print("3. Create Jump Subsector.")
-    print("4. Create Jump Subsector - Hex Method.")
-    print("5. Exit Program.")
+    print("3. Create Jump Subsector - Hex Method.")
+    print("4. Exit Program.")
 
     try:
         select = int(input("\nSelection: "))    
@@ -37,21 +36,6 @@ while(program_running):
             except ValueError:
                 print("Invalid Selection!")
             else:
-                try:
-                    known = int(input("Known System Radius: "))
-                except ValueError:
-                    print("Invalid Selection!")
-                else:
-                    saveFile = open("New Sector.txt", 'a')
-                    saveFile.write(t_util.create_j_subsector(j_range,known))
-                    saveFile.close()
-                    print("\n\nSystem Saved!\n\n")
-        elif select == 4:
-            try:
-                j_range = int(input("Jump Range: "))
-            except ValueError:
-                print("Invalid Selection!")
-            else:
                 origin = ((str(j_range+1)).zfill(2))*2
                 try:
                     known = int(input("Known System Radius: "))
@@ -64,5 +48,5 @@ while(program_running):
                     saveFile.write(t_util.create_jlist_sector(board,known))
                     saveFile.close()
                     print("\n\nSystem Saved!\n\n")
-        elif select == 5:
+        elif select == 4:
             program_running = False
