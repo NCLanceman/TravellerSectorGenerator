@@ -377,35 +377,26 @@ def create_system(remarks):
     #print(print_description(uwp))
 
     return uwp
-
-def create_j_subsector(jlimit, known):
-    result = ""
-    current_sys = create_system()
     
-    #Create System for center hex
-    while current_sys[0] != "A":
-        current_sys = create_system("Capital")
-
-    result += "SYSTEM CAPITAL: \n" + print_description(current_sys)
-    for i in range(1, jlimit+1):
-        cycle = i * 6
-        if i <= known:
-            for j in range(1, cycle+1):
-                print(("Rolling for Location{}-{}").format(i,j))
-                roll = single_throw()
-                if roll >= 4:
-                    current_sys = create_system("Known")
-                    location = "Location {}-{} \n".format(i,j)
-                    result += location + print_description(current_sys)
-                    print("Hit! " + current_sys)
-        else: 
-            for j in range(1,cycle+1):
-                print(("Rolling for Location{}-{}").format(i,j))
-                roll = single_throw()
-                if roll >= 4:
-                    location = "Location {}-{} \n".format(i,j)
-                    result += location + "An unexplored system is here.\n"
-                    print("Hit! Unexplored System.\n")
+def create_j_sector(h_list, known):
+    result = ("Hex\tName\tUWP\tRemarks\t{Ix}\t(Ex)\t[Cx]\tN\tB\tZ\tPBG\tW\tA\tStellar\n")
+    for x in h_list:
+        roll = single_throw()
+        location = x.description
+        if x.dist_from_origin == 0 and x.dist_from_origin <= known:
+            while current_sys[0] != "A":
+                current_sys = create_system("Capital")
+            result += location +"\tCapital\t"+ current_sys + "\n" 
+        elif x.dist_from_origin <= known:
+            if roll >= 4:
+                current_sys = create_system("Known")
+                result += location +"\tKnown\t"+ current_sys +"\n"
+                print("Hit! " + current_sys)
+        elif x.dist_from_origin > known:
+            if roll >= 4:
+                current_sys = create_system("Unknown")
+                result += location +"\tBlank\t"+ current_sys +"\n"
+                print("Hit! Unexplored System.\n")
     return result
 
 def create_sector(h_list):

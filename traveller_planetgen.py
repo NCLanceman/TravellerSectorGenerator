@@ -46,7 +46,7 @@ while(program_running):
                     board = t_util.grid_generate(j_range)
                     saveFile = open("New Jump Sector.txt", 'a')
                     saveFile.write("Origin: " + origin + "\n")
-                    saveFile.write(t_util.create_jlist_sector(board,known))
+                    saveFile.write(t_util.create_j_sector(board,known))
                     saveFile.close()
                     print("\n\nSystem Saved!\n\n")
         elif select == 4:
