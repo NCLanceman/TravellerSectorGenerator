@@ -12,8 +12,9 @@ while(program_running):
     print("Make a selection: ")
     print("1. Create a New System.")
     print("2. Save Previous System.")
-    print("3. Create Jump Subsector - Hex Method.")
-    print("4. Exit Program.")
+    print("3. Create Jump Subsector.")
+    print("4. Create Standard Subsector.")
+    print("5. Exit Program.")
 
     try:
         select = int(input("\nSelection: "))    
@@ -43,10 +44,23 @@ while(program_running):
                     print("Invalid Selection!")
                 else:
                     board = t_util.grid_generate(j_range)
-                    saveFile = open("New Sector.txt", 'a')
+                    saveFile = open("New Jump Sector.txt", 'a')
                     saveFile.write("Origin: " + origin + "\n")
                     saveFile.write(t_util.create_jlist_sector(board,known))
                     saveFile.close()
                     print("\n\nSystem Saved!\n\n")
         elif select == 4:
+            sector_list = []
+            
+            for x in range(1,9):
+                for y in range (1,11):
+                    hexlocation = (str(x)).zfill(2) + (str(y)).zfill(2)
+                    sector_list.append(hexlocation)
+            board = t_util.create_sector(sector_list)
+
+            saveFile = open("New Standard Sector.txt", 'a')
+            saveFile.write(board)
+            saveFile.close()
+            print("\n\nSystem Saved!\n\n")
+        elif select == 5:
             program_running = False

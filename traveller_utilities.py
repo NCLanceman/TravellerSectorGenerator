@@ -408,28 +408,16 @@ def create_j_subsector(jlimit, known):
                     print("Hit! Unexplored System.\n")
     return result
 
-def create_jlist_sector(h_list, known):
+def create_sector(h_list):
     result = ("Hex\tName\tUWP\tRemarks\t{Ix}\t(Ex)\t[Cx]\tN\tB\tZ\tPBG\tW\tA\tStellar\n")
 
-    for x in h_list:
+    for location in h_list:
         roll = single_throw()
-        location = x.description
 
-        if x.dist_from_origin == 0 and x.dist_from_origin <= known:
-            while current_sys[0] != "A":
-                current_sys = create_system("Capital")
-            result += location +"\tCapital\t"+ current_sys + "\n" 
-        elif x.dist_from_origin <= known:
-            if roll >= 4:
-                current_sys = create_system("Known")
-                result += location +"\tKnown\t"+ current_sys +"\n"
-                print("Hit! " + current_sys)
-        elif x.dist_from_origin > known:
-            if roll >= 4:
-                current_sys = create_system("Unknown")
-                result += location +"\tBlank\t"+ current_sys +"\n"
-                print("Hit! Unexplored System.\n")
-         
+        if roll >= 4:
+            current_sys = create_system("Known")
+            result += location +"\tKnown\t"+ current_sys +"\n"
+            print("Hit! " + current_sys)         
     
     return result
     
