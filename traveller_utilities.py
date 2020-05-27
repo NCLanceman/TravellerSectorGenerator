@@ -309,23 +309,33 @@ def create_system(remarks):
     #Planet Size
     psize = throw()-2
     #Atmosphere
-    patmo = (throw()-7) + psize
-
-    if patmo >= 12:
-        patmo = 12
-    elif patmo <= 0:
+    if(psize == 0):
         patmo = 0
+    else:
+        if (psize > 0):
+            patmo = (throw()-7) + psize
+        elif (psize == 0): 
+            patmo = 0
+
+        if patmo >= 12:
+            patmo = 12
+        elif patmo <= 0:
+            patmo = 0
 
     #Hydrographic
-    if patmo <= 1 or patmo > 9:
-        phydro = (throw()-7) + patmo - 4
-    else: 
-        phydro = (throw()-7) + patmo
-
-    if phydro >= 10:
-        phydro = 10
-    elif phydro <= 0:
+    if (psize == 0) or (psize==1):
         phydro = 0
+    else:
+        if patmo <= 1 or patmo > 9:
+            phydro = (throw()-7) + patmo - 4
+        else: 
+            phydro = (throw()-7) + patmo
+
+        if phydro >= 10:
+            phydro = 10
+        elif phydro <= 0:
+            phydro = 0
+    
 
     #Population
     ppop = (throw()-2)
