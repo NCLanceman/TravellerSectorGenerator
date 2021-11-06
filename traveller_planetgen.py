@@ -43,24 +43,29 @@ while(program_running):
                 except ValueError:
                     print("Invalid Selection!")
                 else:
-                    board = t_util.grid_generate(j_range)
+                    board = t_util.jump_sector_hex(j_range)
+                    board = t_util.create_j_sector(board, known,origin)
                     saveFile = open("New Jump Sector.txt", 'a')
                     saveFile.write("Origin: " + origin + "\n")
-                    saveFile.write(t_util.create_j_sector(board,known))
+                    saveFile.write(t_util.board_printer(board))
                     saveFile.close()
                     print("\n\nSystem Saved!\n\n")
         elif select == 4:
-            sector_list = []
+            board = t_util.create_sector()
             
-            for x in range(1,9):
-                for y in range (1,11):
-                    hexlocation = (str(x)).zfill(2) + (str(y)).zfill(2)
-                    sector_list.append(hexlocation)
-            board = t_util.create_sector(sector_list)
+            sectorFile = open("New Standard Sector.txt", 'w')
+            sectorFile.write(t_util.board_printer(board))
+            sectorFile.close()
 
-            saveFile = open("New Standard Sector.txt", 'a')
-            saveFile.write(board)
-            saveFile.close()
+            sectorFile = open("New Standard Sector.txt", 'r')
+            sector = sectorFile.read()
+            planets = sector.split("\n")
+
+
+            tradeFile= open("New Trade Routes.txt",'w')
+            tradeFile.write(t_util.traderoute_printer(planets))
+            sectorFile.close()
+            tradeFile.close()
             print("\n\nSystem Saved!\n\n")
         elif select == 5:
             program_running = False

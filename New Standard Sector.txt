@@ -1,44 +1,48 @@
 Hex	Name	UWP	Remarks	{Ix}	(Ex)	[Cx]	N	B	Z	PBG	W	A	Stellar
-0101	Known	C445552-7	Ag Ni 							222			
-0102	Known	A442431-E	Ni Po 					N		221			
-0103	Known	C59A9AA-C	In Wa 					S		663			
-0105	Known	A553577-8	Ni Po 							331			
-0109	Known	A53166A-8	Na Ni Po 							553			
-0203	Known	A867843-B	Ri 					N		110			
-0206	Known	E7468AA-3								222			
-0209	Known	C000000-C	Ni Va As 							112			
-0210	Known	C235578-9	Ni 							661			
-0301	Known	B840467-A	Ni Po De 							223			
-0303	Known	E556959-5								223			
-0305	Known	C200978-B	Na In Va 							441			
-0306	Known	C422764-9	Na Po 					S		111			
-0307	Known	C236643-9	Ni 					S		220			
-0308	Known	A87A733-B	Wa 							660			
-0309	Known	E2009C8-8	Na In Va 							550			
-0402	Known	C200468-8	Ni Va 							550			
-0404	Known	E636534-8	Ni 							331			
-0405	Known	A835635-9	Ni 					N		333			
-0408	Known	B895798-5	Ag 							223			
-0409	Known	C78A485-B	Ni Wa 					S		223			
-0502	Known	B5A8435-A	Ni 					N		442			
-0503	Known	CA9A537-6	Ni Wa 					S		660			
-0504	Known	B454304-9	Ni 					S		111			
-0508	Known	B734436-A	Ni 							441			
-0509	Known	A668626-B	Ag Ni 					N		331			
-0601	Known	B320374-D	Ni Po 							331			
-0603	Known	A335000-D	Ni 					NS		330			
-0604	Known	C000322-A	Ni Va As 							663			
-0606	Known	AAB9696-C	Ni 					N		223			
-0607	Known	C500102-7	Ni Va 					S		551			
-0610	Known	C6A4246-9	Ni 					S		663			
-0701	Known	D554568-4	Ag Ni 							442			
-0703	Known	E999433-6	Ni 							113			
-0704	Known	E130898-6	Na Po De 							110			
-0705	Known	C688450-5	Ni 							441			
-0706	Known	A786450-A	Ni 							662			
-0707	Known	B344557-8	Ag Ni 							440			
-0708	Known	C643951-8	In Po 					S		442			
-0804	Known	B20049A-8	Ni Va 							442			
-0805	Known	E478130-4	Ni 							111			
-0809	Known	B100586-9	Ni Va 					NS		112			
-0810	Known	A667555-9	Ag Ni 					N		660			
+0101	Known	C9B69BA-7								331			
+0105	Known	B434412-D	Ni 					N		663			
+0106	Known	B688232-6	Ni 					N		441			
+0108	Known	C666101-6	Ni 							333			
+0109	Known	B574101-C	Ni 							440			
+0201	Known	B7567CA-9	Ag 							223			
+0202	Known	B86249A-7	Ni 					NS		112			
+0203	Known	C544779-4	Ag 					S		221			
+0204	Known	C537100-7	Ni 							112			
+0209	Known	C454413-5	Ni 					S		220			
+0302	Known	A358546-E	Ag Ni 					S		441			
+0303	Known	E779524-5	Ni 							330			
+0304	Known	B253434-9	Ni Po 							551			
+0306	Known	A37549A-9	Ni 							113			
+0308	Known	C340553-B	Ni Po De 							663			
+0401	Known	E769794-2	Ri 							553			
+0402	Known	C569643-5	Ni Ri 							662			
+0403	Known	B622420-C	Ni Po 					NS		333			
+0405	Known	B7B58BA-B								221			
+0409	Known	B631538-7	Ni Po 							443			
+0501	Known	C365554-A	Ag Ni 					S		111			
+0505	Known	D688698-1	Ag Ni Ri 							661			
+0508	Known	DA99526-6	Ni 							113			
+0509	Known	C788665-7	Ag Ni Ri 					S		551			
+0510	Known	A584663-A	Ag Ni Ri 					N		442			
+0601	Known	CA89598-A	Ni 					S		551			
+0602	Known	A441655-E	Ni Po 					N		333			
+0603	Known	E7AA7AA-8	Wa 							553			
+0606	Known	A45869A-D	Ag Ni 							330			
+0608	Known	E642374-5	Ni Po 							113			
+0610	Known	B310337-9	Ni 					N		111			
+0703	Known	A963510-8	Ni 							550			
+0704	Known	B5248CA-6						S		111			
+0705	Known	D797002-6	Ni 							222			
+0707	Known	B649565-C	Ni 					N		553			
+0708	Known	B445796-7	Ag 					NS		443			
+0709	Known	E65567A-5	Ag Ni 							222			
+0710	Known	C766586-9	Ag Ni 							663			
+0801	Known	B799432-A	Ni 							550			
+0802	Known	E58A964-8	Wa 							550			
+0803	Known	C434153-B	Ni 							112			
+0804	Known	B54459A-8	Ag Ni 							553			
+0805	Known	A779656-E	Ni Ri 							551			
+0806	Known	D224765-8								662			
+0807	Known	D300786-3	Na Va 							553			
+0808	Known	D424769-5								443			
+0810	Known	B34399A-B	In Po 					S		112			

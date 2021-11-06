@@ -1,9 +1,6 @@
 import random
-import map_hex
+import map_hex as m
 import traveller_charts as t_charts
-
-def __init__():
-    self.Charts = Traveller_Charts()
 
 def single_throw():
     return random.randint(1,6)
@@ -14,22 +11,33 @@ def throw():
 def half_throw():
     return random.randint(1,3)
 
-def grid_generate(radius):
-    origin = [radius+1, radius+1]
-    edge = origin[0] + radius
+def jump_sector_hex(radius):
+    #origin = [radius+1, radius+1]
+    edge = (radius*2)+1
 
     board = []
     count = 0
-    print("Origin is at :", origin)
     for i in range(1,edge+1):
         for j in range(1, edge+1):
-            name = ("{}-{}").format(i,j)
-            print(("Adding #{}: {}").format(count,name))
-            coord = [i,j]
-            board.append(map_hex.Map_Hex(coord, origin))
+            hexlocation = (str(i)).zfill(2) + (str(j)).zfill(2)
+            board.append(m.Map_Hex(hexlocation))
             count = count + 1
     
     return board
+
+def subsector_hex():
+    board =[]
+    count = 0
+
+    for x in range(1,9):
+        for y in range (1,11):
+            hexlocation = (str(x)).zfill(2) + (str(y)).zfill(2)
+            board.append(m.Map_Hex(hexlocation))
+            count = count + 1
+    
+    return board
+
+
 
 def systemcontent():
     syscontent = {
@@ -378,38 +386,289 @@ def create_system(remarks):
 
     return uwp
     
-def create_j_sector(h_list, known):
-    result = ("Hex\tName\tUWP\tRemarks\t{Ix}\t(Ex)\t[Cx]\tN\tB\tZ\tPBG\tW\tA\tStellar\n")
-    for x in h_list:
+def create_j_sector(board, known, origin):
+    for x in board:
         roll = single_throw()
-        location = x.description
-        if x.dist_from_origin == 0 and x.dist_from_origin <= known:
+        location = x.name
+        if x.dist_from(origin) == 0 and x.dist_from(origin) <= known:
+            current_sys = create_system("Capital")
             while current_sys[0] != "A":
                 current_sys = create_system("Capital")
-            result += location +"\tCapital\t"+ current_sys + "\n" 
-        elif x.dist_from_origin <= known:
+            fulluwp = x.name + "\tCapital\t" + current_sys
+            x.data = fulluwp
+        elif x.dist_from(origin) <= known:
             if roll >= 4:
                 current_sys = create_system("Known")
-                result += location +"\tKnown\t"+ current_sys +"\n"
-                print("Hit! " + current_sys)
-        elif x.dist_from_origin > known:
+                fulluwp = x.name +"\tKnown\t"+ current_sys
+                x.data = fulluwp
+        elif x.dist_from(origin) > known:
             if roll >= 4:
                 current_sys = create_system("Unknown")
-                result += location +"\tBlank\t"+ current_sys +"\n"
-                print("Hit! Unexplored System.\n")
-    return result
+                fulluwp = x.name +"\tBlank\t"+ current_sys
+                x.data = fulluwp
+    return board
 
-def create_sector(h_list):
-    result = ("Hex\tName\tUWP\tRemarks\t{Ix}\t(Ex)\t[Cx]\tN\tB\tZ\tPBG\tW\tA\tStellar\n")
-
-    for location in h_list:
+def create_sector():
+    board = subsector_hex()
+    for location in board:
         roll = single_throw()
 
         if roll >= 4:
             current_sys = create_system("Known")
-            result += location +"\tKnown\t"+ current_sys +"\n"
+            fulluwp = location.name +"\tKnown\t"+ current_sys 
+            location.data = fulluwp
             print("Hit! " + current_sys)         
     
+    #traderoute_evaluate(board)
+
+    return board
+
+def board_printer(board):
+    result = ("Hex\tName\tUWP\tRemarks\t{Ix}\t(Ex)\t[Cx]\tN\tB\tZ\tPBG\tW\tA\tStellar\n")
+
+    for x in board:
+        if x.data:
+            result += x.data + "\n"
     return result
+
+def traderoute_printer(planets):
+    data = traderoute_evaluate(planets)
+    clean_data = traderoute_cleaner(data)
+
+    result = "<?xml version=\"1.0\"?>\n<Sector>\n<Routes>\n"
     
+    for x in clean_data:
+        #print(x[0])
+        result += ("\t<Route Start = \"{}\" End=\"{}\"/>\n").format(x[0], x[1])
+    
+    result += "\n</Routes>\n</Sector>"
+    return result
+
+def traderoute_cleaner(c_list):
+    print(("Connections: {} Entries").format(len(c_list)))
+
+    print("Removing redundant entries.")
+
+    for x in c_list:
+        for y in c_list:
+            if(x[0]==y[1]) and (x[1]==y[0]):
+                c_list.remove(y)
+
+    print(("c_list: {} Entries").format(len(c_list)))
+
+    print("Removing duplicate paths")
+    for x in c_list:
+        for y in c_list:
+            for z in c_list:
+                if(x[1]==y[0]) and (y[1] == z[1]) and (z[0]==x[0]):
+                    print(("Comparing {},{},{}").format(x,y,z))
+                    if(y[2] > z[2]):
+                        print(("Removing {}").format(y))
+                        c_list.remove(y)
+                    else:
+                        print(("Removing {}").format(z))
+                        c_list.remove(z)
+
+    print(("Connections: {} Entries").format(len(c_list)))
+    return c_list
+
+#Using lists and iterators is a fucking awful way to do this
+#TODO: figure out how python dictionaries work
+def traderoute_evaluate(planets):
+    populated = []
+    a_ports = []
+    b_ports = []
+    c_ports = []
+    d_ports = []
+    e_ports = []
+
+    connections = []
+
+    for i in planets:
+        if i:
+            entry = i.split("\t")
+            if (entry[0] != "Hex"):
+                location = str(entry[0])
+                starport = str(entry[2][0])
+                newHex = m.Map_Hex(location)
+                newHex.data = i
+                populated.append(newHex)
+
+                if (starport == "A"):
+                    a_ports.append(newHex)
+                elif (starport == "B"):
+                    b_ports.append(newHex)
+                elif (starport =="C"):
+                    c_ports.append(newHex)
+                elif (starport == "D"):
+                    d_ports.append(newHex)
+                elif (starport == "E"):
+                    e_ports.append(newHex)
+
+    print("Evaluating A Ports.")
+    for x in a_ports:
+        for y in populated:
+            roll = single_throw()
+            entry = y.data.split("\t")
+            near_starport = str(entry[2][0])
+            dist = x.distance(y)
+
+            if dist == 1:
+                if near_starport == "A" or near_starport == "B" or near_starport == "C" or near_starport == "D":
+                    print(("Evaluating {} against {}: Distance {}, Near Starport {}, Roll Of {}").format(x.name, y.name, dist, near_starport, roll))
+                    connections.append([x.name,y.name,dist])
+                    print(("Adding {} to {} Connections").format(y.name, x.name))
+                elif (near_starport == "E"):
+                    if(roll >= 2):
+                        print(("Evaluating {} against {}: Distance {}, Near Starport {}, Roll Of {}").format(x.name, y.name, dist, near_starport, roll))
+                        connections.append([x.name,y.name,dist])
+                        print(("Adding {} to {} Connections").format(y.name, x.name))
+            elif  dist == 2:
+                if (near_starport == "A") and (roll >= 2):
+                    print(("Evaluating {} against {}: Distance {}, Near Starport {}, Roll Of {}").format(x.name, y.name, dist, near_starport, roll))
+                    connections.append([x.name,y.name,dist])
+                    print(("Adding {} to {} Connections").format(y.name, x.name))
+                elif (near_starport == "B") and (roll >= 3):
+                    print(("Evaluating {} against {}: Distance {}, Near Starport {}, Roll Of {}").format(x.name, y.name, dist, near_starport, roll))
+                    connections.append([x.name,y.name,dist])
+                    print(("Adding {} to {} Connections").format(y.name, x.name))
+                elif (near_starport == "C") and (roll >= 4):
+                    print(("Evaluating {} against {}: Distance {}, Near Starport {}, Roll Of {}").format(x.name, y.name, dist, near_starport, roll))
+                    connections.append([x.name,y.name,dist])
+                    print(("Adding {} to {} Connections").format(y.name, x.name))
+                elif (near_starport == "D") and (roll >= 5):
+                    print(("Evaluating {} against {}: Distance {}, Near Starport {}, Roll Of {}").format(x.name, y.name, dist, near_starport, roll))
+                    connections.append([x.name,y.name,dist])
+                    print(("Adding {} to {} Connections").format(y.name, x.name))
+            elif dist == 3:
+                if (near_starport == "A") or (near_starport == "B"):
+                    if (roll >= 4):
+                        print(("Evaluating {} against {}: Distance {}, Near Starport {}, Roll Of {}").format(x.name, y.name, dist, near_starport, roll))
+                        connections.append([x.name,y.name,dist])
+                        print(("Adding {} to {} Connections").format(y.name, x.name))
+                elif (near_starport == "C") and (roll >= 6):
+                        print(("Evaluating {} against {}: Distance {}, Near Starport {}, Roll Of {}").format(x.name, y.name, dist, near_starport, roll))
+                        connections.append([x.name,y.name,dist])
+                        print(("Adding {} to {} Connections").format(y.name, x.name))
+            elif dist == 4:
+                if (near_starport == "A") or (near_starport == "B"):
+                    if (roll >= 5):
+                        print(("Evaluating {} against {}: Distance {}, Near Starport {}, Roll Of {}").format(x.name, y.name, dist, near_starport, roll))
+                        connections.append([x.name,y.name,dist])
+                        print(("Adding {} to {} Connections").format(y.name, x.name))
+
+    print("Evaluating B Ports.")
+    for x in b_ports:
+        for y in populated:
+            roll = single_throw()
+            entry = y.data.split("\t")
+            near_starport = str(entry[2][0])
+            dist = x.distance(y)
+
+            if (dist == 1):
+                if(near_starport == "B"):
+                    print(("Evaluating {} against {}: Distance {}, Near Starport {}, Roll Of {}").format(x.name, y.name, dist, near_starport, roll))
+                    connections.append([x.name,y.name,dist])
+                    print(("Adding {} to {} Connections").format(y.name, x.name))
+                elif (near_starport == "C") and (roll >= 2):
+                    print(("Evaluating {} against {}: Distance {}, Near Starport {}, Roll Of {}").format(x.name, y.name, dist, near_starport, roll))
+                    connections.append([x.name,y.name,dist])
+                    print(("Adding {} to {} Connections").format(y.name, x.name))
+                elif (near_starport == "D") and (roll >= 3):
+                    print(("Evaluating {} against {}: Distance {}, Near Starport {}, Roll Of {}").format(x.name, y.name, dist, near_starport, roll))
+                    connections.append([x.name,y.name,dist])
+                    print(("Adding {} to {} Connections").format(y.name, x.name))
+                elif (near_starport == "E") and (roll >= 4):
+                    print(("Evaluating {} against {}: Distance {}, Near Starport {}, Roll Of {}").format(x.name, y.name, dist, near_starport, roll))
+                    connections.append([x.name,y.name,dist])
+                    print(("Adding {} to {} Connections").format(y.name, x.name))
+            elif (dist == 2):
+                if (near_starport == "B") and (roll >= 3):
+                    print(("Evaluating {} against {}: Distance {}, Near Starport {}, Roll Of {}").format(x.name, y.name, dist, near_starport, roll))
+                    connections.append([x.name,y.name,dist])
+                    print(("Adding {} to {} Connections").format(y.name, x.name))
+                elif (near_starport == "C") and (roll >= 4):
+                    print(("Evaluating {} against {}: Distance {}, Near Starport {}, Roll Of {}").format(x.name, y.name, dist, near_starport, roll))
+                    connections.append([x.name,y.name,dist])
+                    print(("Adding {} to {} Connections").format(y.name, x.name))
+                elif (near_starport == "D") and (roll >= 6):
+                    print(("Evaluating {} against {}: Distance {}, Near Starport {}, Roll Of {}").format(x.name, y.name, dist, near_starport, roll))
+                    connections.append([x.name,y.name,dist])
+                    print(("Adding {} to {} Connections").format(y.name, x.name))
+            elif (dist == 3):
+                if (near_starport == "B") and (roll >= 4):
+                    print(("Evaluating {} against {}: Distance {}, Near Starport {}, Roll Of {}").format(x.name, y.name, dist, near_starport, roll))
+                    print(("Adding {} to {} Connections").format(y.name, x.name))
+                elif (near_starport == "C") and (roll >= 6):
+                    print(("Evaluating {} against {}: Distance {}, Near Starport {}, Roll Of {}").format(x.name, y.name, dist, near_starport, roll))
+                    connections.append([x.name,y.name,dist])
+                    print(("Adding {} to {} Connections").format(y.name, x.name))
+            elif (dist == 4):
+                if (near_starport == "B") and (roll >= 6):
+                    print(("Evaluating {} against {}: Distance {}, Near Starport {}, Roll Of {}").format(x.name, y.name, dist, near_starport, roll))
+                    connections.append([x.name,y.name,dist])
+                    print(("Adding {} to {} Connections").format(y.name, x.name))
+
+    #Evaluate all Class C Starports
+    print("Evaluating C Ports.")
+    for x in c_ports:
+        for y in populated:
+            roll = single_throw()
+            entry = y.data.split("\t")
+            near_starport = str(entry[2][0])
+            dist = x.distance(y)
+
+            if (dist == 1):
+                if(near_starport == "C") and (roll >= 3):
+                    print(("Evaluating {} against {}: Distance {}, Near Starport {}, Roll Of {}").format(x.name, y.name, dist, near_starport, roll))
+                    connections.append([x.name,y.name,dist])
+                    print(("Adding {} to {} Connections").format(y.name, x.name))
+                elif (near_starport == "D") or (near_starport == "E"): 
+                    if(roll >= 4):
+                        print(("Evaluating {} against {}: Distance {}, Near Starport {}, Roll Of {}").format(x.name, y.name, dist, near_starport, roll))
+                        connections.append([x.name,y.name,dist])
+                        print(("Adding {} to {} Connections").format(y.name, x.name))
+            if (dist == 2):
+                if (near_starport == "C") and (roll >= 6):
+                    print(("Evaluating {} against {}: Distance {}, Near Starport {}, Roll Of {}").format(x.name, y.name, dist, near_starport, roll))
+                    connections.append([x.name,y.name,dist])
+                    print(("Adding {} to {} Connections").format(y.name, x.name))
+
+    #Evaluate all Class D Starports
+    print("Evaluating D Ports.")
+    for x in d_ports:
+        for y in populated:
+            roll = single_throw()
+            entry = y.data.split("\t")
+            near_starport = str(entry[2][0])
+            dist = x.distance(y)
+
+            if (dist == 1):
+                if(near_starport == "D") and (roll >= 4):
+                    print(("Evaluating {} against {}: Distance {}, Near Starport {}, Roll Of {}").format(x.name, y.name, dist, near_starport, roll))
+                    connections.append([x.name,y.name,dist])
+                    print(("Adding {} to {} Connections").format(y.name, x.name))
+                elif (near_starport == "E") and (roll >= 5):
+                    print(("Evaluating {} against {}: Distance {}, Near Starport {}, Roll Of {}").format(x.name, y.name, dist, near_starport, roll))
+                    connections.append([x.name,y.name,dist])
+                    print(("Adding {} to {} Connections").format(y.name, x.name))
+
+    #Evaluate all Class E Starports
+    print("Evaluating E Ports.")
+    for x in e_ports:
+        for y in populated:
+            roll = single_throw()
+            entry = y.data.split("\t")
+            near_starport = str(entry[2][0])
+            dist = x.distance(y)
+
+            if (dist == 1):
+                if(near_starport == "E") and (roll >= 6):
+                    print(("Evaluating {} against {}: Distance {}, Near Starport {}, Roll Of {}").format(x.name, y.name, dist, near_starport, roll))
+                    connections.append([x.name,y.name,dist])
+                    print(("Adding {} to {} Connections").format(y.name, x.name))
+    print(("Connections: {} Entries").format(len(connections)))
+    return (connections)
+
+
     
