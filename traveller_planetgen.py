@@ -1,5 +1,5 @@
 import traveller_utilities as t_util
-import map_hex
+import traveller_traderoute as t_trade
 #Starter Traveller Planet Generation
 
 program_running = True
@@ -45,10 +45,14 @@ while(program_running):
                 else:
                     board = t_util.jump_sector_hex(j_range)
                     board = t_util.create_j_sector(board, known,origin)
-                    saveFile = open("New Jump Sector.txt", 'a')
+                    saveFile = open("New Jump Sector.txt", 'w')
                     saveFile.write("Origin: " + origin + "\n")
                     saveFile.write(t_util.board_printer(board))
                     saveFile.close()
+
+                    tradeFile = open("New Jump Sector Trade Routes.txt",'w')
+                    tradeFile.write(t_trade.generateTradeRoutes("New Jump Sector.txt"))
+                    tradeFile.close()
                     print("\n\nSystem Saved!\n\n")
         elif select == 4:
             board = t_util.create_sector()
@@ -57,14 +61,8 @@ while(program_running):
             sectorFile.write(t_util.board_printer(board))
             sectorFile.close()
 
-            sectorFile = open("New Standard Sector.txt", 'r')
-            sector = sectorFile.read()
-            planets = sector.split("\n")
-
-
             tradeFile= open("New Trade Routes.txt",'w')
-            tradeFile.write(t_util.traderoute_printer(planets))
-            sectorFile.close()
+            tradeFile.write(t_trade.generateTradeRoutes("New Standard Sector.txt"))
             tradeFile.close()
             print("\n\nSystem Saved!\n\n")
         elif select == 5:
