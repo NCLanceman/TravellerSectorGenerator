@@ -50,7 +50,7 @@ def uwp1_translate(base):
         "A": "A. Excellent quality installation. \nRefined Fuel Available. " +
         "Annual maintainence overhaul available. Shipyard capable of constructing starships and " +
         "non-starships present.",
-        "B": "B. Good quality installation. \nRefined fuel available. Annual maintainence overhaul available." +
+        "B": "B. Good quality installation. \nRefined fuel available. Annual maintainence overhaul available. " +
         "Shipyard capable of constructing non-starships present.",
         "C": "C. Routine quality installation. \nOnly unrefined fuel available. Reasonable repair facilities present.",
         "D": "D. Poor quality installaition. \nOnly unrefined fuel available. No repair or shipyard facilities present.",

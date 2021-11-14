@@ -169,10 +169,17 @@ def uwp_gen(base, size, atmo, hydro, pop, govt, law, tech, content, remarks):
 
     return uwp 
 
-def print_description(uwp):
-    content = uwp.split('\t')
-    
+def print_description(data):
+    content = data.split('\t')
     print(content)
+    uwp = ""
+
+    if(data[0] not in ["A","B","C","D","E","X","?"]):
+        #print("Adjusting Entry...")
+        uwp = "\t".join(content[2:])
+        content = content[2:]
+        #print(("UWP: {}").format(uwp))
+        #print(("Content: {}").format(content))
 
     description = ""
     if uwp[0] == "?":
@@ -190,15 +197,18 @@ def print_description(uwp):
         description +=("\nTech Level: " + t_charts.uwp8_translate(uwp[8]))
 
         if content:
-            if "N" in content[6]: 
+            if (content[6] == "N"):
                 description +=("\nNaval Base? Y")
-            else:
+                description +=("\nScout Base? N")
+            elif (content[6] == "S"):
                 description +=("\nNaval Base? N")
-            
-            if "S" in content[6]:
+                description +=("\nScout Base? S")
+            elif (content[6]== "NS"):
+                description +=("\nNaval Base? Y")
                 description +=("\nScout Base? Y")
-            else:
-                description +=("\nScout Base? Y")
+            elif (content[6]==""):
+                description +=("\nNaval Base? N")
+                description +=("\nScout Base? N")
             
             if (int(content[8][2]) > 0):
                 description +=("\nGas Giant? Y\n\n")

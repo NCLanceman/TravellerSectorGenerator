@@ -2,7 +2,7 @@ import random
 import map_hex as m
 
 
-def generateTradeRoutes(UPPData):
+def generateTradeRoutes(UPPData, bias):
     tradeRoutes = []
 
     sectorfile = open(UPPData, 'r')
@@ -14,7 +14,8 @@ def generateTradeRoutes(UPPData):
 
     #Use Populated to create a list of all possible Connections
     connections = generateConnections(populated)
-    tradeRoutes = verifyConnections(connections)
+    tradeRoutes = trade_bias(connections,bias)
+    tradeRoutes = verifyConnections(tradeRoutes)
 
     return traderoute_printer(tradeRoutes)
 
@@ -92,6 +93,9 @@ def verifyConnections(data):
 
 def single_throw():
     return random.randint(1,6)
+
+def d100_throw():
+    return random.randint(1,100)
 
 def A_Port_Eval(candidate):
     roll = single_throw()
@@ -271,3 +275,12 @@ def traderoute_printer(connections):
     
     result += "\n</Routes>\n</Sector>"
     return result
+
+def trade_bias(data, percentage):
+    print("Applying Bias...")
+    for i in data:
+        roll = d100_throw()
+        if (roll < percentage):
+            print(("Removing : {}").format(i))
+            data.remove(i)
+    return data
