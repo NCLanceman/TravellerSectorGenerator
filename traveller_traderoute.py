@@ -16,7 +16,7 @@ def generateTradeRoutes(UPPData, bias):
     connections = generateConnections(populated)
     tradeRoutes = trade_bias(connections,bias)
     tradeRoutes = verifyConnections(tradeRoutes)
-
+    
     return traderoute_printer(tradeRoutes)
 
 def generateBoard(planets):
@@ -25,7 +25,7 @@ def generateBoard(planets):
     for i in planets:
         if i:
             entry = i.split("\t")
-            if (entry[0] != "Hex") and (entry[0][0:6] != "Origin"):
+            if (entry[0] != "Hex") and (entry[0][0:6] != "Origin") and (entry[1] != "Blank"):
                 location = str(entry[0])
                 newHex = m.Map_Hex(location)
                 newHex.data = i
@@ -277,10 +277,16 @@ def traderoute_printer(connections):
     return result
 
 def trade_bias(data, percentage):
-    print("Applying Bias...")
-    for i in data:
-        roll = d100_throw()
-        if (roll < percentage):
-            print(("Removing : {}").format(i))
-            data.remove(i)
+    #Calculate Expected Number of Removals:
+    projectedRemovals = int(len(data) * (percentage / 100))
+    actualRemovals = 0
+
+    print("Applying Bias...")    
+    while(actualRemovals < projectedRemovals):
+        data.pop(random.randrange(len(data)))
+        actualRemovals = actualRemovals + 1
+        
+    print(("Removals Expected: {}, Actual Removals: {}").format(projectedRemovals, actualRemovals))
+    print(("Connections after Bias: {} Entries").format(len(data)))
+
     return data
