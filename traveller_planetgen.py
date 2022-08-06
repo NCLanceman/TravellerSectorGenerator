@@ -1,6 +1,8 @@
 import os
+import requests
 import traveller_utilities as t_util
 import traveller_traderoute as t_trade
+import traveller_mapmaker as t_map
 
 def getSectorName():
     name = str(input("Enter Sector Name: "))
@@ -9,7 +11,15 @@ def getSectorName():
 #Set up file paths for Result Folder
 path = os.getcwd()
 if((os.path.isdir('Results')) == False):
-        os.mkdir('Results')
+    os.mkdir('Results')
+if((os.path.isdir('Results/Charts/'))==False):
+    os.mkdir('Results/Charts')
+if((os.path.isdir('Results/Trade Routes')==False)):
+    os.mkdir('Results/Trade Routes')
+if((os.path.isdir('Results/Maps'))==False):
+    os.mkdir('Results/Maps')
+if((os.path.isdir('Results/Booklets'))==False):
+    os.mkdir('Results/Booklets')
 
 workingFilePath = os.path.join(path,'Results')
 
@@ -25,9 +35,11 @@ while(program_running):
     print("2. Save Previous System.")
     print("3. Create Jump Subsector.")
     print("4. Create Standard Subsector.")
-    print("5. Add or Replace Trade Route to Existing Subsector Chart")
-    print("6. Create Booklet from UWP Chart.")
-    print("7. Exit Program.")
+    print("5. Create Full Subsector.")
+    print("6. Add or Replace Trade Route to Existing Subsector Chart")
+    print("7. Create Booklet from UWP Chart.")
+    print("8. Generate Map From Existing Sector.")
+    print("9. Exit Program.")
 
     try:
         select = int(input("\nSelection: "))    
@@ -42,17 +54,17 @@ while(program_running):
             print(result)
         #Save Previous System
         elif select == 2:
-            fileName = os.path.join(workingFilePath, "Saved UWPs.txt")
+            fileName = os.path.join(workingFilePath,"Charts","Saved UWPs.txt")
             saveFile = open(fileName, 'a')
             saveFile.write("\n"+t_util.print_description(current_uwp)+"\n\n")
             saveFile.close()
             print("\n\nFile Saved!\n\n")
         #Create Jump Subsector
         elif select == 3:
-            sectorName = getSectorName()
+            sectorName = getSectorName() + " Jump Sector"
             tradeRoutes = sectorName + " Trade Routes"
-            sectorFileName = os.path.join(workingFilePath, sectorName +".txt")
-            tradeFileName = os.path.join(workingFilePath, tradeRoutes + ".txt")
+            sectorFileName = os.path.join(workingFilePath,"Charts", sectorName +".txt")
+            tradeFileName = os.path.join(workingFilePath,"Trade Routes", tradeRoutes + ".txt")
             bias = int(input("Enter Trade Route Bias (1-100%): "))
             try:
                 j_range = int(input("Jump Range: "))
@@ -78,10 +90,29 @@ while(program_running):
                     print("\n\nSystem Saved!\n\n")
         #Create Standard Subsector
         elif select == 4:
-            sectorName = getSectorName()
+            sectorName = getSectorName() + " Subsector"
             tradeRoutes = sectorName + " Trade Routes"
-            sectorFileName = os.path.join(workingFilePath, sectorName +".txt")
-            tradeFileName = os.path.join(workingFilePath, tradeRoutes + ".txt")
+            sectorFileName = os.path.join(workingFilePath,"Charts", sectorName +".txt")
+            tradeFileName = os.path.join(workingFilePath,"Trade Routes", tradeRoutes + ".txt")
+
+            bias = int(input("Enter Trade Route Bias (1-100%): "))
+
+            board = t_util.create_subsector()
+            
+            sectorFile = open(sectorFileName, 'w')
+            sectorFile.write(t_util.board_printer(board))
+            sectorFile.close()
+
+            tradeFile= open(tradeFileName,'w')
+            tradeFile.write(t_trade.generateTradeRoutes(sectorFileName,bias))
+            tradeFile.close()
+            print("\n\nSystem Saved!\n\n")
+        #Create Full Sector
+        elif select == 5:
+            sectorName = getSectorName() + " Sector"
+            tradeRoutes = sectorName + " Trade Routes"
+            sectorFileName = os.path.join(workingFilePath,'Charts', sectorName +".txt")
+            tradeFileName = os.path.join(workingFilePath,'Trade Routes',tradeRoutes + ".txt")
 
             bias = int(input("Enter Trade Route Bias (1-100%): "))
 
@@ -96,14 +127,12 @@ while(program_running):
             tradeFile.close()
             print("\n\nSystem Saved!\n\n")
         #Create or Reroll Trade Route
-        elif select == 5:
-            list = os.listdir(workingFilePath)
+        elif select == 6:
+            chartsPath = os.path.join(workingFilePath,'Charts')
+            tradePath = os.path.join(workingFilePath,'Trade Routes')
+            
+            list = os.listdir(chartsPath)
 
-            for i in list:
-                if (i[-16:] == "Trade Routes.txt"):
-                    list.remove(i)
-                elif (i[-11:] == "Booklet.txt"):
-                    list.remove(i)
             for j in range(len(list)):
                 print(("{}. {}").format(j+1, list[j]))
             
@@ -117,8 +146,8 @@ while(program_running):
                 elif (selection in range(1,len(list)+1)):
                     print("Generating New Trade Routes...")
                     tradeRoutes = (list[selection-1])[:-4] + " Trade Routes"
-                    sectorFileName = os.path.join(workingFilePath, list[selection-1])
-                    tradeFileName = os.path.join(workingFilePath, tradeRoutes + ".txt")
+                    sectorFileName = os.path.join(chartsPath, list[selection-1])
+                    tradeFileName = os.path.join(tradePath, tradeRoutes + ".txt")
                     bias = int(input("Enter Trade Route Bias (1-100%): "))
                     
                     tradeFile= open(tradeFileName,'w')
@@ -126,14 +155,11 @@ while(program_running):
                     tradeFile.close()
                     print("\n\nSystem Saved!\n\n")
         #Create Booklet from UWP Chart
-        elif select == 6:
-            list = os.listdir(workingFilePath)
-
-            for i in list:
-                if (i[-16:] == "Trade Routes.txt"):
-                    list.remove(i)
-                elif (i[-11:] == "Booklet.txt"):
-                    list.remove(i)
+        elif select == 7:
+            chartsPath = os.path.join(workingFilePath,'Charts')
+            bookPath = os.path.join(workingFilePath,'Booklets')
+            
+            list = os.listdir(chartsPath)
 
             for j in range(len(list)):
                 print(("{}. {}").format(j+1, list[j]))
@@ -148,14 +174,14 @@ while(program_running):
                 elif (selection in range(1,len(list)+1)):
                     print("Generating Booklet...")
                     booklet = (list[selection-1])[:-4] + " Booklet"
-                    sectorFileName = os.path.join(workingFilePath, list[selection-1])
-                    bookletFileName = os.path.join(workingFilePath, booklet + ".txt")
+                    sectorFileName = os.path.join(chartsPath, list[selection-1])
+                    bookletFileName = os.path.join(bookPath, booklet + ".txt")
                     
                     bookletFile= open(bookletFileName,'w')
                     sectorFile = open(sectorFileName,'r')
-                    sector = (sectorFile.read()).split("\n")
+                    chart = (sectorFile.read()).split("\n")
 
-                    for i in sector:
+                    for i in chart:
                         if i:
                             entry = i.split("\t")
                             #current_uwp = entry[2:]
@@ -167,5 +193,8 @@ while(program_running):
                     bookletFile.close()
                     sectorFile.close()
                     print("\n\nSystem Saved!\n\n")
-        elif select == 7:
+        #Create a Map from Existing Subsector
+        elif select == 8:
+            t_map.mapCreate(workingFilePath)
+        elif select == 9:
             program_running = False

@@ -37,7 +37,17 @@ def subsector_hex():
     
     return board
 
+def sector_hex():
+    board = []
+    count = 0
 
+    for x in range(1,33):
+        for y in range (1,41):
+            hexlocation = (str(x)).zfill(2) + (str(y)).zfill(2)
+            board.append(m.Map_Hex(hexlocation))
+            count = count + 1
+    
+    return board
 
 def systemcontent():
     syscontent = {
@@ -418,7 +428,7 @@ def create_j_sector(board, known, origin):
                 x.data = fulluwp
     return board
 
-def create_sector():
+def create_subsector():
     board = subsector_hex()
     for location in board:
         roll = single_throw()
@@ -429,8 +439,19 @@ def create_sector():
             location.data = fulluwp
             print("Hit! " + current_sys)         
     
-    #traderoute_evaluate(board)
+    return board
 
+def create_sector():
+    board = sector_hex()
+    for location in board:
+        roll = single_throw()
+
+        if roll >=4:
+            current_sys = create_system("Known")
+            fulluwp = location.name+"\tKnown\t"+current_sys
+            location.data = fulluwp
+            print("Hit!" + current_sys)
+    
     return board
 
 def board_printer(board):

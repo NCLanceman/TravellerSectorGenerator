@@ -12,10 +12,15 @@ def generateTradeRoutes(UPPData, bias):
     populated = generateBoard(planets)
     sectorfile.close()
 
+    #NOTE: Previous versions of this problem went generateConnections->tradeBias->verifyConnections
+    #Compare and contrast results over time
+
     #Use Populated to create a list of all possible Connections
     connections = generateConnections(populated)
-    tradeRoutes = trade_bias(connections,bias)
-    tradeRoutes = verifyConnections(tradeRoutes)
+    #Verify possible Connections as actual trade routes
+    tradeRoutes = verifyConnections(connections)
+    #Randomly remove X% of Verified Trade Routes
+    tradeRoutes = tradeBias(tradeRoutes,bias)
     
     return traderoute_printer(tradeRoutes)
 
@@ -34,7 +39,6 @@ def generateBoard(planets):
     return board
 
 def generateConnections(data):
-
     connections = []
 
     for x in data:
@@ -246,7 +250,7 @@ def E_Port_Eval(candidate):
     near_starport = candidate[3]
     
     if (dist == 1):
-        if(near_starport == "E") and (roll >= 6):
+        if(near_starport == "E") and (roll == 6):
             print(("E Port Connection: {}").format(candidate))
             return True
         else:
@@ -276,7 +280,7 @@ def traderoute_printer(connections):
     result += "\n</Routes>\n</Sector>"
     return result
 
-def trade_bias(data, percentage):
+def tradeBias(data, percentage):
     #Calculate Expected Number of Removals:
     projectedRemovals = int(len(data) * (percentage / 100))
     actualRemovals = 0
